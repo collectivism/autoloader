@@ -10,11 +10,56 @@ namespace Collectivism\Autoloader;
 
 class Autoloader
 {
-    public static function load($classMap)
+    /**
+     * Returns the *Singleton* instance of this class.
+     *
+     * @staticvar Singleton $instance The *Singleton* instances of this class.
+     *
+     * @return Singleton The *Singleton* instance.
+     */
+    public static function getInstance()
+    {
+        static $instance = null;
+        if (null === $instance) {
+            $instance = new static();
+        }
+
+        return $instance;
+    }
+
+    /**
+     * Protected constructor to prevent creating a new instance of the
+     * *Singleton* via the `new` operator from outside of this class.
+     */
+    protected function __construct()
+    {
+    }
+
+    /**
+     * Private clone method to prevent cloning of the instance of the
+     * *Singleton* instance.
+     *
+     * @return void
+     */
+    private function __clone()
+    {
+    }
+
+    /**
+     * Private unserialize method to prevent unserializing of the *Singleton*
+     * instance.
+     *
+     * @return void
+     */
+    private function __wakeup()
+    {
+    }
+
+    public function load($classMap)
     {
         $files = [];
         foreach ($classMap as $namespace => $path) {
-            $files = array_merge($files, self::getFiles($namespace, $path));
+            $files = array_merge($files, $this->getFiles($namespace, $path));
         }
 
         foreach ($files as $file) {
@@ -33,7 +78,7 @@ class Autoloader
      *
      * @return mixed Returns list of files if directory is valid
      */
-    public static function getFiles($namespace, $path)
+    protected function getFiles($namespace, $path)
     {
         $output = [];
         if (is_dir($path)) {
@@ -54,7 +99,7 @@ class Autoloader
      *
      * Checks the namespace in the file
      */
-    public static function validate($namespace, $path)
+    protected function validate($namespace, $path)
     {
     }
 

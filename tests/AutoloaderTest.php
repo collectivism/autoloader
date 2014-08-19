@@ -17,6 +17,7 @@ class AutoloaderTest extends \PHPUnit_Framework_TestCase
             'Autoloader\\Tests\\Namespace2' => __DIR__ . '/Namespace2'
             ];
 
-        Autoloader::load($classMap);
+        $autoloader = Autoloader::getInstance();
+        $autoloader->load($classMap);
     }
 }
