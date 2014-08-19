@@ -28,10 +28,10 @@ class Autoloader
      * Scans the directory and returns the list of files
      * Also checks the directory exists or not
      *
-     * @param       $namespace      string      Namespace
-     * @param       $path           string      Directory path of namespace
+     * @param   $namespace string      Namespace
+     * @param   $path      string      Directory path of namespace
      *
-     * @return      mixed           Returns list of files if directory is valid
+     * @return mixed Returns list of files if directory is valid
      */
     public static function getFiles($namespace, $path)
     {
@@ -42,6 +42,7 @@ class Autoloader
                 if (!is_dir($file))
                     $output[] = $path . '/' . $file;
             }
+
             return $output;
         } else {
             throw new \Exception($path . ' does not exist');
