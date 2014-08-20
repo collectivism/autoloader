@@ -113,7 +113,7 @@ class Autoloader
      */
     public function register()
     {
-        spl_autoload_register(array($this, 'loadClass'));
+        spl_autoload_register(array($this, 'load'));
     }
 
 
