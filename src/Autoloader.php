@@ -52,6 +52,8 @@ namespace Collectivism\Autoloader;
 
 class Autoloader
 {
+    protected static $classMap;
+
     /**
      * Returns the *Singleton* instance of this class.
      *
@@ -75,6 +77,7 @@ class Autoloader
      */
     protected function __construct()
     {
+        self::$classMap = array();
     }
 
     /**
@@ -97,7 +100,6 @@ class Autoloader
     {
     }
 
-
     /**
      * An associative array where the key is a namespace prefix and the value
      * is an array of base directories for classes in that namespace.
@@ -111,21 +113,20 @@ class Autoloader
      *
      * @return void
      */
-    public function register()
+    public function register($classMap)
     {
+        self::$classMap = $classMap;
         spl_autoload_register(array($this, 'load'));
     }
 
-
-    public function load($classMap)
+    protected function load()
     {
-        foreach ($classMap as $namespace => $baseDir) {
+        foreach (self::$classMap as $namespace => $baseDir) {
             $namespace = trim($namespace,'\\');
             $this->addNamespace($namespace,$baseDir);
             $this->getFiles($namespace, $baseDir);
         }
     }
-
 
     /**
      * Adds a base directory for a namespace prefix.
@@ -138,7 +139,7 @@ class Autoloader
      *                         than last.
      * @return void
      */
-    public function addNamespace($prefix, $baseDir, $prepend = false)
+    protected function addNamespace($prefix, $baseDir, $prepend = false)
     {
         // normalize namespace prefix
         //$prefix = trim($prefix, '\\') ;
@@ -159,36 +160,32 @@ class Autoloader
         }
     }
 
-    public function validate($namespace,$file)
+    protected function validate($namespace,$file)
     {
         $spaces = $this->getNamespace($file);
-        if(in_array($namespace, $spaces))
-        {
+        if (in_array($namespace, $spaces)) {
             return true;
         }
+
         return false;
-        
     }
 
-
-    public function getNamespace($file)
+    protected function getNamespace($file)
     {
         $fp = fopen($file, 'r');
         $namespace = array();
-        while(!feof($fp))
-        {
+        while (!feof($fp)) {
             $line = fgets($fp);
-            if (stripos($line,'namespace')!==false)
-            {
+            if (stripos($line,'namespace')!==false) {
                 $line = trim($line);
                 $n = explode(" ", $line);
                 $a = substr($n[1], 0,strpos($n[1],';'));
                 array_push($namespace,$a);
             }
         }
+
         return $namespace;
     }
-
 
     /**
      * getFiles
@@ -205,24 +202,21 @@ class Autoloader
     {
         if (is_dir($path)) {
             $files = scandir($path);
-            foreach ($files as $fileName)
-            {
-                if (!is_dir($fileName))
-                {
+            foreach ($files as $fileName) {
+                if (!is_dir($fileName)) {
                     $file = $path .'/'.$fileName;
-                    if($this->validate($namespace,$file))
-                    {
+                    if ($this->validate($namespace,$file)) {
                         $this->requireFile($file);
                     }
 
                 }
             }
-            return true; 
+
+            return true;
         } else {
             return false;
         }
     }
-
 
     /**
      * Loads the class file for a given class name.
@@ -232,7 +226,7 @@ class Autoloader
      *                      failure.
      */
 
-    public function loadClass($className)
+    protected function loadClass($className)
     {
         // the current namespace prefix
         $prefix = $className;
@@ -261,7 +255,6 @@ class Autoloader
         // never found a mapped file
         return false;
     }
-
 
     /**
      * Load the mapped file for a namespace prefix and relative class.
@@ -299,8 +292,6 @@ class Autoloader
         return false;
     }
 
-
-
     /**
      * If a file exists, require it from the file system.
      *
@@ -317,5 +308,4 @@ class Autoloader
 
         return false;
     }
-
 }
