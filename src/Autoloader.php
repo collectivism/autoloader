@@ -117,6 +117,16 @@ class Autoloader
     }
 
 
+    public function load($classMap)
+    {
+        foreach ($classMap as $namespace => $baseDir) {
+            $namespace = trim($namespace,'\\');
+            $this->addNamespace($namespace,$baseDir);
+            $this->getFiles($namespace, $baseDir);
+        }
+    }
+
+
     /**
      * Adds a base directory for a namespace prefix.
      *
@@ -131,7 +141,7 @@ class Autoloader
     public function addNamespace($prefix, $baseDir, $prepend = false)
     {
         // normalize namespace prefix
-        $prefix = trim($prefix, '\\') . '\\';
+        //$prefix = trim($prefix, '\\') ;
 
         // normalize the base directory with a trailing separator
         $baseDir = rtrim(rtrim($baseDir, '/'), DIRECTORY_SEPARATOR) . '/';
@@ -149,7 +159,69 @@ class Autoloader
         }
     }
 
+    public function validate($namespace,$file)
+    {
+        $spaces = $this->getNamespace($file);
+        if(in_array($namespace, $spaces))
+        {
+            return true;
+        }
+        return false;
+        
+    }
 
+
+    public function getNamespace($file)
+    {
+        $fp = fopen($file, 'r');
+        $namespace = array();
+        while(!feof($fp))
+        {
+            $line = fgets($fp);
+            if (stripos($line,'namespace')!==false)
+            {
+                $line = trim($line);
+                $n = explode(" ", $line);
+                $a = substr($n[1], 0,strpos($n[1],';'));
+                array_push($namespace,$a);
+            }
+        }
+        return $namespace;
+    }
+
+
+    /**
+     * getFiles
+     *
+     * Scans the directory and returns the list of files
+     * Also checks the directory exists or not
+     *
+     * @param   $namespace string      Namespace
+     * @param   $path      string      Directory path of namespace
+     *
+     * @return mixed Returns list of files if directory is valid
+     */
+    protected function getFiles($namespace, $path)
+    {
+        if (is_dir($path)) {
+            $files = scandir($path);
+            foreach ($files as $fileName)
+            {
+                if (!is_dir($fileName))
+                {
+                    $file = $path .'/'.$fileName;
+                    if($this->validate($namespace,$file))
+                    {
+                        $this->requireFile($file);
+                    }
+
+                }
+            }
+            return true; 
+        } else {
+            return false;
+        }
+    }
 
 
     /**
@@ -160,20 +232,20 @@ class Autoloader
      *                      failure.
      */
 
-    public function load($classMap)
+    public function loadClass($className)
     {
         // the current namespace prefix
-        $prefix = $classMap;
+        $prefix = $className;
 
         // work backwards through the namespace names of the fully-qualified
         // class name to find a mapped file name
         while (false !== $pos = strrpos($prefix, '\\')) {
 
             // retain the trailing namespace separator in the prefix
-            $prefix = substr($classMap, 0, $pos + 1);
+            $prefix = substr($className, 0, $pos + 1);
 
             // the rest is the relative class name
-            $relativeClass = substr($classMap, $pos + 1);
+            $relativeClass = substr($className, $pos + 1);
 
             // try to load a mapped file for the prefix and relative class
             $mappedFile = $this->loadMappedFile($prefix, $relativeClass);
