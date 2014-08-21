@@ -5,7 +5,7 @@ namespace Collectivism\Autoloader;
 /**
  * Autoloader
  *
- * A simple autoloading class which is only PSR-4 compliant
+ * A simple autoloading class which works out of the box
  *
  * A general-purpose implementation that includes the optional functionality
  * of allowing multiple base directories for a single namespace prefix.
@@ -27,15 +27,18 @@ namespace Collectivism\Autoloader;
  * as follows:
  *
  *      <?php
+ *      use \Collectivism\Autoloader;
  *      // instantiate the loader
- *      $loader = new \Keradus\Psr4Autoloader();
+ *      $loader = Autoloader::getInstance();
+ *
+ *      $classMap = array(
+ *          'Foo\\Bar' => __DIR__ . '/path/to/package/foo-bar/src',
+ *          'Foo\\Bar' => __DIR__ . '/path/to/package/foo-bar/tests',
+ *      );
  *
  *      // register the autoloader
  *      $loader->register();
  *
- *      // register the base directories for the namespace prefix
- *      $loader->addNamespace('Foo\Bar', '/path/to/packages/foo-bar/src');
- *      $loader->addNamespace('Foo\Bar', '/path/to/packages/foo-bar/tests');
  *
  * The following line would cause the autoloader to attempt to load the
  * \Foo\Bar\Qux\Quux class from /path/to/packages/foo-bar/src/Qux/Quux.php:
@@ -119,6 +122,11 @@ class Autoloader
         spl_autoload_register(array($this, 'load'));
     }
 
+    /**
+     * Load the classmap given via register
+     *
+     * @return void
+     */
     protected function load()
     {
         foreach (self::$classMap as $namespace => $baseDir) {
