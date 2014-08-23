@@ -18,6 +18,6 @@ class AutoloaderTest extends \PHPUnit_Framework_TestCase
             );
 
         $autoloader = Autoloader::getInstance();
-        $autoloader->load($classMap);
+        $autoloader->register($classMap);
     }
 }
